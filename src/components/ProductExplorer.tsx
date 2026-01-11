@@ -9,7 +9,7 @@ import { Header } from "./Header";
 import { CategoryFilter } from "./CategoryFilter";
 import { SortDropdown } from "./SortDropdown";
 import { ProductGrid } from "./ProductGrid";
-import { ProductSkeletonGrid } from "./ui/ProductSkeleton";
+import { ProductSkeletonGrid, CategoryFilterSkeleton } from "./ui/ProductSkeleton";
 import { ErrorState } from "./ui/ErrorState";
 import { EmptyState } from "./ui/EmptyState";
 
@@ -67,11 +67,15 @@ export function ProductExplorer() {
           <div className="space-y-8">            
             <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <CategoryFilter
-                  categories={categories}
-                  selected={filters.category}
-                  onChange={setCategory}
-                />
+                {isLoading ? (
+                  <CategoryFilterSkeleton />
+                ) : (
+                  <CategoryFilter
+                    categories={categories}
+                    selected={filters.category}
+                    onChange={setCategory}
+                  />
+                )}
                 <SortDropdown value={filters.sort} onChange={setSort} />
               </div>
             </div>

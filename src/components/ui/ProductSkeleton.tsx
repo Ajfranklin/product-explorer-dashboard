@@ -29,4 +29,16 @@ export function ProductSkeletonGrid({ count = 8 }: { count?: number }) {
   );
 }
 
+export function CategoryFilterSkeleton() {
+  return (
+    <div className="flex flex-wrap gap-2 animate-pulse">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div
+          key={i}
+          className="h-10 w-24 bg-zinc-200 dark:bg-zinc-800 rounded-xl"
+        />
+      ))}
+    </div>
+  );
+}
 

@@ -14,7 +14,9 @@ export class APIError extends Error {
 
 export async function fetchProducts(): Promise<Product[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/products`);
+    const response = await fetch(`${API_BASE_URL}/products`, {
+      next: { revalidate: 3600 },
+    });
 
     if (!response.ok) {
       throw new APIError(
@@ -35,7 +37,9 @@ export async function fetchProducts(): Promise<Product[]> {
 
 export async function fetchProductById(id: number): Promise<Product> {
   try {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`);
+    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+      next: { revalidate: 3600 },
+    });
 
     if (!response.ok) {
       if (response.status === 404) {
