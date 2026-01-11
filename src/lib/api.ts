@@ -40,6 +40,8 @@ export async function fetchProductById(id: number): Promise<Product> {
     const response = await fetch(`${API_BASE_URL}/products/${id}`, {
       cache: 'no-store'
     });
+    console.log(`${API_BASE_URL}/products/${id}`)
+    console.log(response)
 
     if (!response.ok) {
       if (response.status === 404) {
