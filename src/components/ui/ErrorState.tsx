@@ -30,7 +30,7 @@ export function ErrorState({
       {onRetry && (
         <button
           onClick={onRetry}
-          className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-zinc-900 font-medium rounded-xl transition-colors"
+          className="px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold rounded-xl shadow-lg shadow-amber-500/30 transition-all hover:shadow-xl hover:shadow-amber-500/40 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
         >
           Try Again
         </button>

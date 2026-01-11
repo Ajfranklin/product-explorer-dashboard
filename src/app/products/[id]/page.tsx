@@ -1,61 +1,89 @@
-import { Suspense } from "react";
-import { notFound } from "next/navigation";
-import { fetchProductById } from "@/lib/api";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { fetchProductById, APIError } from "@/lib/api";
 import { Header } from "@/components/Header";
 import { ProductDetails } from "./ProductDetails";
 import { ProductDetailsSkeleton } from "./ProductDetailsSkeleton";
-import type { Metadata } from "next";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Product } from "@/types/product";
 
-interface ProductPageProps {
-  params: Promise<{ id: string }>;
-}
+export default function ProductPage() {
+  const params = useParams();
+  const id = params?.id as string;
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export async function generateMetadata({
-  params,
-}: ProductPageProps): Promise<Metadata> {
-  const { id } = await params;
-  const productId = parseInt(id, 10);
+  useEffect(() => {
+    async function loadProduct() {
+      const productId = parseInt(id, 10);
+      if (isNaN(productId)) {
+        setError("Invalid product ID");
+        setIsLoading(false);
+        return;
+      }
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await fetchProductById(productId);        
+        setProduct(data);
+      } catch (err) {        
+        if (err instanceof APIError) {          
+            setError("Product not found");          
+        } else {
+          setError("An unexpected error occurred");
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
 
-  if (isNaN(productId)) {
-    return {
-      title: "Product Not Found | Product Explorer",
-    };
-  }
+    if (id) {
+      loadProduct();
+    }
+  }, [id]);
 
-  try {
-    const product = await fetchProductById(productId);
-    return {
-      title: `${product.title} | Product Explorer`,
-      description: product.description.slice(0, 160),
-    };
-  } catch {
-    return {
-      title: "Product Not Found | Product Explorer",
-    };
-  }
-}
-
-
-export default async function ProductPage({ params }: ProductPageProps) {
-  try {    
-    const { id } = await params;
+  const handleRetry = async () => {
+    setError(null);
+    setIsLoading(true);
     const productId = parseInt(id, 10);
-    const product = await fetchProductById(productId);  
-  
-    return (
-      <>
-        <Header />
-        <main className="flex-1">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <Suspense fallback={<ProductDetailsSkeleton />}>
-              <ProductDetails product={product} />
-            </Suspense>
-          </div>
-        </main>
-      </>
-    );
-  } catch (err) {
-    console.log(err)
-    notFound()
-  }
+    if (!isNaN(productId)) {
+      try {
+        let product = await fetchProductById(productId)
+        setProduct(product)
+        setError(null);        
+      } catch (err) {        
+        if (err instanceof APIError) {          
+            setError("Product not found");          
+        } else {
+          setError("An unexpected error occurred");
+        }        
+      } finally {
+        setIsLoading(false);
+      }        
+    }
+  };
+
+  return (
+    <>
+      <Header />
+      <main className="flex-1">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {isLoading ? (
+            <ProductDetailsSkeleton />
+          ) : error ? (            
+            <ErrorState
+              title={error === "Product not found" ? "Product Not Found" : ""}
+              message={error === "Product not found" ? "The product you're looking for doesn't exist." : error}
+              onRetry={handleRetry}
+            />
+          ) : product ? (
+            <ProductDetails product={product} />
+          ) : null}
+        </div>
+      </main>
+    </>
+  );
 }
