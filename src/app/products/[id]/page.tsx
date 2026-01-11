@@ -10,18 +10,8 @@ interface ProductPageProps {
   params: Promise<{ id: string }>;
 }
 
+export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
-
-export async function generateStaticParams() {
-  try {
-    const products = await fetchProducts();
-    return products.map((product) => ({
-      id: String(product.id),
-    }));
-  } catch {
-    return [];
-  }
-}
 
 export async function generateMetadata({
   params,
@@ -48,7 +38,8 @@ export async function generateMetadata({
   }
 }
 
-async function ProductContent({ id }: { id: string }) {
+export default async function ProductPage({ params }: ProductPageProps) {
+  const { id } = await params;
   const productId = parseInt(id, 10);
 
   if (isNaN(productId)) {
@@ -57,25 +48,18 @@ async function ProductContent({ id }: { id: string }) {
 
   try {
     const product = await fetchProductById(productId);
-    return <ProductDetails product={product} />;
-  } catch {
-    notFound();
+    return (
+        <>
+          <Header />
+          <main className="flex-1">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <ProductDetails product={product} />
+            </div>
+          </main>
+        </>
+      );
+    } catch (error) {      
+      console.error('Error fetching product:', error);
+      notFound();
   }
-}
-
-export default async function ProductPage({ params }: ProductPageProps) {
-  const { id } = await params;
-  
-  return (
-    <>
-      <Header />
-      <main className="flex-1">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Suspense fallback={<ProductDetailsSkeleton />}>
-            <ProductContent id={id} />
-          </Suspense>
-        </div>
-      </main>
-    </>
-  );
 }
